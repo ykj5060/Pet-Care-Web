@@ -2,6 +2,8 @@
 
 ## Overview
 This project presents a state-of-the-art chatbot designed to assist pet owners by providing reliable health care information. The bot is built upon the powerful LangChain and LLaMA 2 models, utilizing AWS SageMaker for robust deployment and MongoDB for efficient data handling.
+![web](/Web_image/web.png)
+![chatbot](/Web_image/chatbot.png)
 
 ## Features
 - **LangChain Integration**: Crafting seamless conversational flows through advanced prompt engineering, ensuring precise user query understanding and response generation.
