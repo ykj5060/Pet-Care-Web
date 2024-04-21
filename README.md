@@ -6,6 +6,7 @@ This project presents a state-of-the-art chatbot designed to assist pet owners b
 ![chatbot](/Web_image/chatbot.png)
 
 ## Features
+![flowchart](/Web_image/image.png)
 - **LangChain Integration**: Crafting seamless conversational flows through advanced prompt engineering, ensuring precise user query understanding and response generation.
 - **LLaMA 2 Model**: Utilizes the LLaMA 2 7B model from HuggingFace, offering comprehensive language understanding capabilities.
 - **Scalable Deployment**: Hosting on AWS SageMaker to provide a responsive and scalable chatbot service.
