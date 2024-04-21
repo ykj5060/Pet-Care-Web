@@ -26,6 +26,7 @@ To get a local copy up and running, follow these simple steps:
 ### Installation
 1. Clone the repo
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   git clone git@github.com:ykj5060/Pet-Care-Web.git
 2. Install required packages
+   ```sh
    pip install -r requirements.txt
