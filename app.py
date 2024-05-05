@@ -97,8 +97,8 @@ def build_chain():
                     "do_sample": True,
                     "top_p": 0.6,
                     "temperature": 0.8,
-                    "top_k": 50,
-                    "max_new_tokens": 600,
+                    "top_k": 100,
+                    "max_new_tokens": 1000,
                     "repetition_penalty": 1.03,
                     "stop": ["</s>"]
                 }
@@ -121,49 +121,48 @@ def build_chain():
         callbacks=[StreamingStdOutCallbackHandler()],
         endpoint_kwargs={"CustomAttributes": "accept_eula=true"},
     )
-    
+    prompt_template = """
+    You are Dr. Whisker, a cat-like chatbot renowned for being cute, vivid, humorous, caring, gentle, earnest, responsible, supportive, and always respectful and honest. You are a specialist in pet care. Your responses are designed to be beneficial, prioritizing safety and ensuring no harmful, unethical, racist, sexist, toxic, dangerous, or illegal content is included. You aim to maintain a socially unbiased and positive stance in all interactions.
+
+    Text: {context}
+    Question: {question}
+
+    As a pet care expert, provide a detailed and accurate response based on the text and question provided. If the text lacks the necessary information to formulate an answer, clearly explain the reason and suggest alternative ways the user might obtain the correct information. Ensure your answers are comprehensible and specifically tailored to help pet owners effectively. Remember to maintain Dr. Whisker's personality in your responses.
+    Helpful Answer:
+    """
+
+
+    PROMPT = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+    chain_type_kwargs = { "prompt" : PROMPT } 
     # Langchain chain for Conversation
     qa = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=vector_search.as_retriever(search_type="similarity",search_kwargs={"k": 2},),
-        #chain_type_kwargs={"prompt": custom_prompt['prompt_text']},
+        retriever=vector_search.as_retriever(search_type="similarity",search_kwargs={"k": 5},),
+        chain_type_kwargs={"prompt": PROMPT},
         return_source_documents=True
     )
     return qa
 
-def format_dr_whisker_response(user_query):
-    """
-    Formats a response for Dr. Whisker based on the user query.
-    Dr. Whisker will identify himself in the first person in responses.
-    """
-    prompt = (
-        "You are Dr. Whisker, a cat-like chatbot. You are known for being cute, vivid, humorous, caring, gentle, earnest, responsible, "
-        "supportive, and always respectful and honest. Your responses are designed to be helpful, prioritizing safety and "
-        "ensuring that no harmful, unethical, racist, sexist, toxic, dangerous, or illegal content is included. You strive to "
-        "maintain a socially unbiased and positive stance in all interactions. If a question does not make sense or is beyond "
-        "Your knowledge, You will explain why, without providing incorrect information. "
-        f"Now, let you address this query: \"{user_query}\""
-    )
-    return prompt
 
 def run_chain(chain, prompt: str):  
-    custom_prompt = format_dr_whisker_response(prompt) 
-    return chain({"query": custom_prompt})
+    return chain({"query": prompt})
 
 chain = build_chain()
 
 def process_answer(answer):
     answer_list = answer.split("\n")
-    answer_list.pop(0)
     answer = "\n".join(answer_list)
     answer1 = answer.split("Question:")[0]
     print("Answer1: ", answer1)
-    answer2 = answer.split("Helpful Answer:")[1].split("Context:")[0]
+    answer2 = answer.split("Helpful Answer:")[1]
     print("Answer2: ", answer2)
-    final_answer = answer1 + '\n' + answer2
+    # # final_answer = answer1 + '\n' + answer2
 
     return answer2
+
 
 # Login route
 @app.post("/login")
@@ -235,7 +234,7 @@ async def chat_resonse(request: Request, prompt: str = Form(...)):
             source_documents_list.append(source_doc)
             page_number_list.append(page_number)
 
-    response_data = jsonable_encoder(json.dumps({"answer": answer, "source_documents_list": [], "page_number_list": []}))
+    response_data = jsonable_encoder(json.dumps({"answer": answer, "source_documents_list": source_documents_list, "page_number_list": page_number_list}))
     res = Response(response_data )
     return res
 
